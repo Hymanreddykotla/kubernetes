@@ -1,0 +1,216 @@
+
+ vim /etc/hosts
+    2  vim /etc/ssh/sshd_config
+    3  yum install ansible*
+    4  vim ansible.cfg
+    5  ll
+    6  rm -rf ansible.cfg
+    7  mkdir -p /etc/ansible
+    8  ll -d /etc/ansible
+    9  vim ansible.cfg
+   10  ping ansible.example.com
+   11  ssh-keygen
+   12  ssh-copy-id root@node1.example.com
+   13  ssh root@node1.example.com
+   14  history
+   15  cd /etc/ansible
+   16  vim hosts
+   17* ansible all -m ping -a data=
+   18  ansible all -m user -a name=hyman uid=1200 home=/ltimindtree state=prese3nt
+   19  ansible all -m user -a name=hyman uid=1200 home=/ltimindtree state=present
+   20  ansible all -m user -a 'name=hyman uid=1200 home=/ltimindtree state=present'
+   21  ssh-copy-id root@node2.example.com
+   22  ansible all -m user -a 'name=hyman uid=1200 home=/ltimindtree state=present'
+    in nodes
+   23  cat /etc/passwd |grep -i hyman
+   24  ansible -doc -l
+   25  ansible-doc -l
+   26  ansible-doc user
+    ansible all -m yum -a 'name=httpd state=present'
+   rpmquery 
+   66  ansible all -m file -a 'path=/tmp/mydir state=directory'
+in nodes 
+cd /tmp
+ll
+ to fetch from nodes
+in node
+vim hyman.txt
+hello
+go to control
+ansible node1.ex.com -m  fetch -a 'src=/tmp/hyman.txt dest=/mnt'
+
+copy in control
+ansible all -m copy -a 'src=/etc/fstab dest=/tmp'
+
+in nodes to check use this commands
+ip a s
+    2  vim /etc/hosts
+    3  vim /etc/ssh/sshd_config
+    4  systemctl enable sshd
+    5  systemctl retart sshd
+    6  systemctl retsart sshd
+    7  systemctl restart sshd
+    8  passwd root
+    9  id hyman
+   10  cat /etc/passwd |grep -i hyman
+   11  rpmquety httpd
+   12  rpmquery httpd
+   13  ll
+   14  cd /tmp
+   15  ll
+   16  cat ..hyman.txt
+   17  cat >>hyman.txt
+   18   ansible node1.example.com -m fetch -a 'src=/tmp/hyman.txt dest=/mnt'
+   19  cat >>hyman.txt
+   20  vim hy.txt
+   21  vim hym.txt
+   22  ll
+
+ history
+  101  ansible all -m command -a 'df -h'
+  102  ansible all -m command -a 'fdisk -l'
+  103  ansible all -m command -a 'cat /etc/passwd'
+
+playbook.yaml
+----working with playbook-----------
+#cd /etc/ansible
+#mkdir project-x
+vim sample-playbook.yaml
+---
+- name: this is sample playbook
+  hosts: all
+  tasks:
+    - name: creating user
+      user:
+        name: sachin
+        uid: 1300
+        home: /heros
+        shell: /bin/bash
+        state: present
+    - name: installing apache
+      yum:
+        name: httpd
+        state: present
+    - name: install cifs
+      yum:
+        name: cifs-utils
+        state: present
+    - name: install vsftpd
+      dnf:
+        name: vsftpd
+        state: latest
+...
+# ansible-playbook sample-playbook.yaml --syntax-check
+#ansible-playbook sample-playbook.yaml -C
+#ansible-playbook sample-playbook.yaml
+verification on target
+rpmquery httpd
+   31  rpmquery vsftpd
+   32  rpmquery cifs-utils
+   33  cat /etc/passwd | grep -i sachin
+adding another tasks
+  - name : started apache service
+      systemd:
+        name: httpd
+        state: started
+        enabled: true
+    - name: start vsftpd
+      systemd:
+        name: vsftpd
+        state: started
+        enabled: true
+to remove service mark state as absent
+
+----configuring basic apache server ---------
+create 3 instances 
+and provide connection between it by making the entry of hostname and ip in /etc/hosts file
+generate ssh key and copy to the target machine under authorized keys
+install ansible on controller machine
+make the entry in /etc/ansible
+[dev-servers]
+ansible-target
+[prod-servers]
+ansible-target2
+#cd /etc/ansible 
+#vim basic-apache.yaml
+---
+- name: configure basic apache
+  hosts: all
+  tasks:
+    - name: installed httpd
+      dnf:
+        name: httpd
+        state: latest
+    - name: copied index.html
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+    - name: started httpd
+      systemd:
+        name: httpd
+        state: started
+        enabled: true
+ #ansible-playbook basic-apache.yaml -C
+ #ansible-playbook basic-apache.yaml
+verify in target machines
+
+-----------handler section----
+remove the httpd package if installed on the 3 machines
+install on controll machine
+ yum install httpd -y
+   48  cd /etc/httpd/conf
+   49  cp httpd.conf /etc/ansible/project-x
+   50  cd
+make a project-x directory in ansible 
+#cd /etc/httpd/conf
+#cp httpd.conf /etc/ansible/project-x
+#cd
+make changes in the httpd.conf file
+#vim hanlders.yaml
+---
+- name: using handlers with apache
+  hosts: ansible-target
+  tasks:
+
+    - name: installed httpd
+      dnf:
+        name: httpd
+        state: latest
+
+    - name: copied httpd.conf file
+      copy:
+        src: httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+      notify: restart_httpd
+
+    - name: copied index.html
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+
+    - name: started httpd
+      systemd:
+        name: httpd
+        state: started
+        enabled: true
+
+    - name: installed firewalld
+      dnf:
+        name: firewalld
+        state: present
+    - name: started firewalld
+      systemd:
+        name: firewalld
+        state: started
+    - name: add port 81 in firewall
+      firewalld:
+        port: 81/tcp
+        permanent: yes
+        state: enabled
+        immediate: true
+  handlers:
+    - name: restart_httpd
+      service:
+        name: httpd
+        state: restarted
+
