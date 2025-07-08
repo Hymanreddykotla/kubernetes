@@ -48,3 +48,60 @@ or you can make cluster in this way
 
  When You want to delete cluster
  eksctl delete cluster --name my-cluster
+
+
+----qos----
+create a eks cluster and with node grp
+###best effort
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hyman-app
+  namespace: default
+  labels:
+   app: hyman-app
+spec:
+  containers:
+    - name: web-app
+      image: nginx
+
+----burtsable---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: burst-app
+  namespace: default
+  labels:
+   app: burst-app
+spec:
+  containers:
+    - name: web-app
+      image: nginx
+      resources:
+        limits:
+          memory: "250Mi"
+        requests:
+          memory: "150Mi"
+
+kubectl get pods
+kubectl describe pod burst-app
+
+--gaurantee--
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gaurantee-app
+  namespace: default
+  labels:
+   app: gaurantee-app
+spec:
+  containers:
+    - name: web-app
+      image: nginx
+      resources:
+        limits:
+          memory: "250Mi"
+          cpu: "400m"
+        requests:
+          memory: "250Mi"
+          cpu: "400m"
