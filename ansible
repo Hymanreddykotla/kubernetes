@@ -214,3 +214,55 @@ make changes in the httpd.conf file
         name: httpd
         state: restarted
 
+--------ec2 provisioning via ansible-----------------
+create an instance
+#sudo su -
+#yum install ansible* -y
+#mkdir -p /etc/ansible
+#cd /etc/ansible
+#vim ansible.cfg
+#ansible-galaxy collection install amazon.aws
+#cd
+#yum install python* --allowerasing --skip-broken
+#yum install awscli --user --upgrade
+#pip install boto
+#dig google.com
+#cd /etc/ansible
+#ll
+#vim hosts
+[localhost]
+localhost
+#ssh-keygen
+#aws configure
+ #passwd root
+ #vim /etc/ssh/sshd_config
+ #systemctl restart sshd
+  #systemctl enable sshd
+  #cd .ssh/
+  #ssh-copy-id root@localhost
+  #cd
+  #cd /etc/ansible
+#pip install botocore
+#vim hosts
+[localhost]
+localhost
+localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3 
+  #vim ec2.yaml
+---
+- hosts:  localhost
+  vars_files:
+    - my_cred.yaml
+  tasks:
+    - name: creating Ec2 instance via Ansible
+      amazon.aws.ec2_instance:
+        aws_access_key: access_key
+        aws_secret_key: secret_key
+        name: K8s-Master
+        instance_type: t2.medium
+        image_id: ami-0a7d80731ae1b2435
+        vpc_subnet_id: subnet-0252c2e12558d5909
+        key_name: key
+        region: us-east-1
+        count: 1
+        state: present
+
