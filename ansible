@@ -287,3 +287,34 @@ cp /etc/fstab /etc/ansible
         name: httpd
         state: started
         enabled: true
+
+--share multiple files---
+- name: copuied files
+  hosts: all
+  tasks:
+    - name: copied mutiple files
+      copy:
+       src: "{{ item }}"
+       dest: /tmp
+
+      loop:
+        - /etc/passwd
+        - /etc/fstab
+        - /etc/gshadow
+        - /etc/group
+ --create multiple user---
+---
+- name: adding multiple users
+  hosts: all
+  tasks:
+    - name: create multiple users
+      user:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - mansi
+        - sachin
+        - uday
+        - deepak
+        - hyman
+
