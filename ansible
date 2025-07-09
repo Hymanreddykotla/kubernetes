@@ -266,3 +266,24 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
         count: 1
         state: present
 
+-----fstab--
+in root /etc/fstab
+cp /etc/fstab /etc/ansible
+
+
+- name: configure basic apache
+  hosts: all
+  tasks:
+    - name: installed httpd
+      dnf:
+        name: httpd
+        state: latest
+    - name: copied fstab
+      copy:
+        src: fstab
+        dest: /tmp
+    - name: started httpd
+      systemd:
+        name: httpd
+        state: started
+        enabled: true
